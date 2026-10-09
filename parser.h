@@ -22,7 +22,7 @@ public:
     string name;
     double width;
     double height;
-    int fanout_max;
+    int fanoutMax;
     vector<double> SS_delay;
     vector<double> FF_delay;
 };
@@ -39,7 +39,7 @@ class Parser{
 public:
     // node
     vector<Node*> nodes;
-    vector<Buffer*> buffers;
+    vector<Buffer> buffers;
     vector<Path*> paths;
     void readNode();
     
