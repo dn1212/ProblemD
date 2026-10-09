@@ -22,7 +22,7 @@ public:
     string name;
     double width;
     double height;
-    int fanout_max;
+    int fanoutMax;
     vector<double> SS_delay;
     vector<double> FF_delay;
 };
@@ -42,7 +42,7 @@ public:
     void readNode();
     
     // buffer
-    
+    vector<Buffer> buffers;
     void readBuffer();
     
     //path

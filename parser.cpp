@@ -1,4 +1,5 @@
-#include "parser.h"
+#include "./parser.h"
+
 using namespace std;
 
 void Parser::readNode(){
@@ -69,12 +70,81 @@ void Parser::readNode(){
 }
 
 void Parser::readBuffer(){
+    // open library file
+    ifstream bufLib;
+    bufLib.open("testcase/testcase0/buf.lib");
+    if(bufLib.fail()){
+        cout << "fail open buf.lib";
+        exit(1);
+    }
+    
+    string line;
+    while(getline(bufLib, line)){
 
+       // new buffer
+        if (line.find("cell (") == string::npos) {
+            continue;
+        }
+        Buffer buffer;
+
+        // name
+        size_t leftParen = line.find('(');
+        size_t rightParen = line.find(')');
+
+        buffer.name = line.substr(leftParen + 1, rightParen - leftParen - 1);
+
+        // size
+        getline(bufLib, line);
+        size_t sizeStart = line.find("SIZE") + 4;
+        size_t byPos = line.find("BY");
+        buffer.width = stod(line.substr(sizeStart, byPos - sizeStart));
+        buffer.height = stod(line.substr(byPos + 2));
+
+        // SS_DELAY
+        getline(bufLib, line);
+        size_t pos = line.find("SS_DELAY") + 8;
+        while (true) {
+            size_t start = line.find_first_not_of(" \t", pos);
+            if (start == string::npos) {
+                break;
+            }
+            size_t end = line.find_first_of(" \t", start);
+            buffer.SS_delay.push_back(stod(line.substr(start, end - start)));
+            if (end == string::npos) {
+                break;
+            }
+            pos = end;
+        }
+
+        // FF_DELAY
+        getline(bufLib, line);
+        pos = line.find("FF_DELAY") + 8;
+        while (true) {
+            size_t start = line.find_first_not_of(" \t", pos);
+            if (start == string::npos) {
+                break;
+            }
+            size_t end = line.find_first_of(" \t", start);
+            buffer.FF_delay.push_back(stod(line.substr(start, end - start)));
+            if (end == string::npos) {
+                break;
+            }
+            pos = end;
+        }
+
+        // fanoutMax
+        buffer.fanoutMax = static_cast<int>(buffer.SS_delay.size());
+
+        buffers.push_back(buffer);
+    }
+
+    bufLib.close();
 }
 
 int main() {
     Parser parser;
     parser.readNode();
+    parser.readBuffer();
 
     /* TEST NODE
     // Test 1: Total number of nodes
@@ -113,5 +183,27 @@ int main() {
     }
     */
 
+    /* TEST BUFFER
+    for (const Buffer& buffer : parser.buffers) {
+
+        cout << "Name: " << buffer.name << endl;
+        cout << "Width: " << buffer.width << endl;
+        cout << "Height: " << buffer.height << endl;
+        cout << "Fanout Max: " << buffer.fanoutMax << endl;
+
+        cout << "SS Delay: ";
+        for (double delay : buffer.SS_delay) {
+            cout << delay << " ";
+        }
+        cout << endl;
+
+        cout << "FF Delay: ";
+        for (double delay : buffer.FF_delay) {
+            cout << delay << " ";
+        }
+        cout << endl << endl;
+    }
+    */
+   
     return 0;
 }
