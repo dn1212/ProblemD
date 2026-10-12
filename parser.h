@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <string>
 
@@ -31,8 +32,8 @@ class Path {
 public:
     Node* launch = nullptr;
     Node* capture = nullptr;
-    double SS_delay;
-    double FF_delay;
+    double SS_delay = 0.0;
+    double FF_delay = 0.0;
 };
 
 class Parser{
@@ -46,6 +47,7 @@ public:
     void readBuffer();
     
     //path
+    vector<Path*> paths;
     void readPath();
 };
 

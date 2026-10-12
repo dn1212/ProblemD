@@ -1,12 +1,11 @@
-#include "./parser.h"
-
+#include "parser.h"
 using namespace std;
 
 void Parser::readNode(){
 
     // open structure file
     ifstream clkTree;
-    clkTree.open("testcase/testcase0/clk_tree.structure");
+    clkTree.open("D_testcase/testcase/testcase0/clk_tree.structure");
     if(clkTree.fail()){
         cout << "fail open clk_tree.structure";
         exit(1);
@@ -67,6 +66,194 @@ void Parser::readNode(){
     }
 
     clkTree.close();
+    return;
+}
+void Parser::readPath() {
+    // FF_delay.rpt
+    std::ifstream ffdelay;
+    ffdelay.open("D_testcase/testcase/testcase0/FF_delay.rpt");
+
+    if (ffdelay.fail()) {
+        cout << "fail open FF_delay.rpt";
+        exit(1);
+    }
+
+    string line;
+
+    // clock period
+    getline(ffdelay, line);
+
+    string temp1, temp2;
+    char colon;
+    double clock_period;
+
+    stringstream ffClock(line);
+
+    ffClock >> temp1 >> temp2 >> colon >> clock_period;
+
+    cout << "Clock period = " << clock_period << endl;
+
+    // skip header
+    getline(ffdelay, line);
+    getline(ffdelay, line);
+
+    // read path
+    while (getline(ffdelay, line)) {
+        
+        if (line.empty())
+            continue;
+
+        string pathName;
+        string launchName;
+        string captureName;
+        string arrow;
+        char colon;
+        double FF_delay;
+
+        stringstream ss(line);
+
+        ss >> pathName
+           >> colon
+           >> launchName
+           >> arrow
+           >> captureName
+           >> FF_delay;
+
+        cout << pathName << " "
+             << launchName << " "
+             << captureName << " "
+             << FF_delay << endl;
+
+        // find launch and capture nodes
+        Node* launchNode = nullptr;
+        Node* captureNode = nullptr;
+
+        for (Node* node : nodes) {
+
+            if (node->name == launchName)
+                launchNode = node;
+
+            if (node->name == captureName)
+                captureNode = node;
+
+            if (launchNode && captureNode)
+                break;
+        }
+
+        // create Path object
+        if (launchNode && captureNode) {
+
+            Path* path = new Path;
+
+            path->launch = launchNode;
+            path->capture = captureNode;
+            path->FF_delay = FF_delay;
+
+  
+            paths.push_back(path);
+
+        } else {
+
+            cout << "Error: Launch or Capture node not found for path: "
+                 << launchName << " -> "
+                 << captureName << endl;
+        }
+    }
+
+    ffdelay.close();
+
+    // SS_delay.rpt
+    std::ifstream ssdelay;
+    ssdelay.open("D_testcase/testcase/testcase0/SS_delay.rpt");
+
+    if (ssdelay.fail()) {
+        cout << "fail open SS_delay.rpt";
+        exit(1);
+    }
+
+    // clock period
+    getline(ssdelay, line);
+
+    stringstream ssClock(line);
+
+    ssClock >> temp1 >> temp2 >> colon >> clock_period;
+
+    cout << "Clock period = " << clock_period << endl;
+
+    // skip header
+    getline(ssdelay, line);
+    getline(ssdelay, line);
+    // read path
+    while (getline(ssdelay, line)) {
+        if (line.empty())
+            continue;
+
+        string pathName;
+        string launchName;
+        string captureName;
+        string arrow;
+        char colon;
+        double SS_delay;
+
+        stringstream ss(line);
+
+        ss >> pathName
+           >> colon
+           >> launchName
+           >> arrow
+           >> captureName
+           >> SS_delay;
+
+        cout << pathName << " "
+             << launchName << " "
+             << captureName << " "
+             << SS_delay << endl;
+
+        // find launch and capture nodes
+        Node* launchNode = nullptr;
+        Node* captureNode = nullptr;
+
+        for (Node* node : nodes) {
+
+            if (node->name == launchName)
+                launchNode = node;
+
+            if (node->name == captureName)
+                captureNode = node;
+
+            if (launchNode && captureNode)
+                break;
+        }
+
+        // create Path object
+        bool pathExists = false;
+        if (launchNode && captureNode) {
+            for (Path* path : paths) {
+                if (path->launch == launchNode && path->capture == captureNode) {
+                    path->SS_delay = SS_delay; 
+                    pathExists = true;
+                    break;
+                }
+            }
+            if(!pathExists) {
+                Path* path = new Path;
+
+                path->launch = launchNode;
+                path->capture = captureNode;
+                path->SS_delay = SS_delay;
+                paths.push_back(path);
+            }
+            
+
+        } else {
+
+            cout << "Error: Launch or Capture node not found for path: "
+                 << launchName << " -> "
+                 << captureName << endl;
+        }
+    }
+
+    ssdelay.close();
 }
 
 void Parser::readBuffer(){
@@ -90,7 +277,7 @@ void Parser::readBuffer(){
         // name
         size_t leftParen = line.find('(');
         size_t rightParen = line.find(')');
-        
+
         buffer.name = line.substr(leftParen + 1, rightParen - leftParen - 1);
 
         // size
