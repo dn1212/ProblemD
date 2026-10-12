@@ -91,8 +91,6 @@ void Parser::readPath() {
 
     ffClock >> temp1 >> temp2 >> colon >> clock_period;
 
-    cout << "Clock period = " << clock_period << endl;
-
     // skip header
     getline(ffdelay, line);
     getline(ffdelay, line);
@@ -118,11 +116,6 @@ void Parser::readPath() {
            >> arrow
            >> captureName
            >> FF_delay;
-
-        cout << pathName << " "
-             << launchName << " "
-             << captureName << " "
-             << FF_delay << endl;
 
         // find launch and capture nodes
         Node* launchNode = nullptr;
@@ -178,8 +171,6 @@ void Parser::readPath() {
 
     ssClock >> temp1 >> temp2 >> colon >> clock_period;
 
-    cout << "Clock period = " << clock_period << endl;
-
     // skip header
     getline(ssdelay, line);
     getline(ssdelay, line);
@@ -203,11 +194,6 @@ void Parser::readPath() {
            >> arrow
            >> captureName
            >> SS_delay;
-
-        cout << pathName << " "
-             << launchName << " "
-             << captureName << " "
-             << SS_delay << endl;
 
         // find launch and capture nodes
         Node* launchNode = nullptr;
