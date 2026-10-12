@@ -90,7 +90,7 @@ void Parser::readBuffer(){
         // name
         size_t leftParen = line.find('(');
         size_t rightParen = line.find(')');
-
+        
         buffer.name = line.substr(leftParen + 1, rightParen - leftParen - 1);
 
         // size
