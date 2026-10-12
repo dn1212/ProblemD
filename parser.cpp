@@ -259,7 +259,7 @@ void Parser::readPath() {
 void Parser::readBuffer(){
     // open library file
     ifstream bufLib;
-    bufLib.open("testcase/testcase0/buf.lib");
+    bufLib.open("D_testcase/testcase/testcase0/buf.lib");
     if(bufLib.fail()){
         cout << "fail open buf.lib";
         exit(1);
@@ -326,71 +326,4 @@ void Parser::readBuffer(){
     }
 
     bufLib.close();
-}
-
-int main() {
-    Parser parser;
-    parser.readNode();
-    parser.readBuffer();
-
-    /* TEST NODE
-    // Test 1: Total number of nodes
-    cout << "Total nodes: "
-         << parser.nodes.size() << endl;
-
-    // Test 2: Print first 10 nodes
-    for (int i = 0; i < 10 && i < parser.nodes.size(); i++) {
-
-        Node* node = parser.nodes[i];
-
-        cout << "------------------" << endl;
-        cout << "Name: " << node->name << endl;
-        cout << "Node Type: " << node->nodeType << endl;
-        cout << "Cell Type: " << node->cellType << endl;
-
-        // Parent
-        if (node->parent != nullptr) {
-            cout << "Parent: " << node->parent->name << endl;
-        }
-        else {
-            cout << "Parent: None" << endl;
-        }
-
-        // Children
-        cout << "Children: ";
-        for (Node* child : node->children) {
-            cout << child->name << " ";
-        }
-        cout << endl;
-    }
-
-    // Free allocated nodes
-    for (Node* node : parser.nodes) {
-        delete node;
-    }
-    */
-
-    /* TEST BUFFER
-    for (const Buffer& buffer : parser.buffers) {
-
-        cout << "Name: " << buffer.name << endl;
-        cout << "Width: " << buffer.width << endl;
-        cout << "Height: " << buffer.height << endl;
-        cout << "Fanout Max: " << buffer.fanoutMax << endl;
-
-        cout << "SS Delay: ";
-        for (double delay : buffer.SS_delay) {
-            cout << delay << " ";
-        }
-        cout << endl;
-
-        cout << "FF Delay: ";
-        for (double delay : buffer.FF_delay) {
-            cout << delay << " ";
-        }
-        cout << endl << endl;
-    }
-    */
-   
-    return 0;
 }
