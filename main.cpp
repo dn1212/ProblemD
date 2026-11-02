@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include "parser.h"
+#include "validator.h"
 
 using namespace std;
 
@@ -11,7 +12,8 @@ int main() {
     parser.readNode();
     parser.readBuffer();
     parser.readPath();
-
+    
+    /*
     const int testCount = 5;
 
     // =========================
@@ -81,5 +83,9 @@ int main() {
              << endl;
     }
 
+    */
+
+    Validator validator;
+    validator.output(parser.nodes[0]);
     return 0;
 }

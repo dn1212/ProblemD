@@ -2,10 +2,10 @@
 #define VALIDATOR_H
 
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vector>
 #include <string>
+#include <fstream>
+#include "parser.h"
 
 using namespace std;
 
@@ -14,6 +14,8 @@ public:
     bool checkFanout();
     bool checkOriginalNode();
     bool checkNewBuffer();
+
+    void output(Node* root);
 };
 
 #endif // VALIDATOR_H
