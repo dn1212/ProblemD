@@ -52,7 +52,7 @@ void Validator::output(Node* root){
             outFile << endl;
         }
 
-        for (int i = (int)node->children.size() - 1; i >= 0; i--) {
+        for (int i = node->children.size() - 1; i >= 0; i--) {
             stack.push_back(node->children[i]);
             levels.push_back(level + 1);
         }

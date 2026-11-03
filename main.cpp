@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include "parser.h"
+#include "editor.h"
 #include "validator.h"
 
 using namespace std;
@@ -84,6 +85,10 @@ int main() {
     }
 
     */
+
+    Editor editor;
+    editor.insertBuffer(parser.nodes[1], parser.nodes[2], "insertTest", parser.nodes);
+    editor.resizeBuffer(parser.nodes[1], "resizeTest");
 
     Validator validator;
     validator.output(parser.nodes[0]);

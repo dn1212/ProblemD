@@ -6,13 +6,15 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include "parser.h"
 
 using namespace std;
 
 class Editor{
 public:
-    void insertBuffer();
-    void resizeBuffer();
+    int bufferCount = 0;
+    void insertBuffer(Node* parent, Node* child, string cellType, vector<Node*>& nodes);
+    void resizeBuffer(Node* node, string newCellType);
 };
 
 #endif // EDITOR_H
