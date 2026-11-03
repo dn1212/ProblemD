@@ -24,7 +24,6 @@ void Editor::insertBuffer(Node* parent, Node* child, string cellType, vector<Nod
             break;
         }
     }
-
     nodes.push_back(newBuffer);
 }
 
