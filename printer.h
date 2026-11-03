@@ -8,6 +8,21 @@
 // Area table
 // Score α、β、γ (initial value: α=0.4、β=0.3、γ=0.3)
 using namespace std;
-void print_result(vector<Node*> nodes, vector<Buffer> buffers, vector<Path*> paths, double& tns_ss, double& tns_ssori, double& wns_ss, double& wns_ssori, double& tns_ff, double& tns_ffori, double& wns_ff, double& wns_ffori, double& area, double& areaori);
+struct TimingResult {
+    double tns_ss = 0.0;
+    double wns_ss = 0.0;
+
+    double tns_ff = 0.0;
+    double wns_ff = 0.0;
+
+    double area = 0.0;
+};
+void update_result(
+    const vector<Node*>& nodes,
+    const vector<Buffer>& buffers,
+    const vector<Path*>& paths,
+    TimingResult& result
+);
 void print_score(double tns_ss, double tns_ssori, double wns_ss, double wns_ssori, double tns_ff, double tns_ffori, double wns_ff, double wns_ffori, double area, double areaori);
+void updateClockDelay(Node* node,unordered_map<string, Buffer>& bufferLib);
 # endif // PRINTER_H

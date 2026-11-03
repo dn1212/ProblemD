@@ -6,9 +6,9 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 using namespace std;
-
 class Node {
 public:
     string name;
@@ -16,6 +16,12 @@ public:
     string cellType;
     Node* parent = nullptr;
     vector<Node*> children;
+    
+    bool isBuffer = false;
+    bool isFF = false;
+
+    double clkDelaySS = 0.0;
+    double clkDelayFF = 0.0;
 };
 
 class Buffer {
@@ -30,6 +36,7 @@ public:
 
 class Path {
 public:
+    string name;
     double clockPeriod = 0.0;
     Node* launch = nullptr;
     Node* capture = nullptr;
@@ -41,14 +48,15 @@ class Parser{
 public:
     // node
     vector<Node*> nodes;
+    unordered_map<string, Node*> nodeMap;
     void readNode();
-    
     // buffer
     vector<Buffer> buffers;
+    unordered_map<string, Buffer> bufferMap;
     void readBuffer();
-    
     //path
     vector<Path*> paths;
+    unordered_map<string, Path*> pathMap;
     void readPath();
 };
 
