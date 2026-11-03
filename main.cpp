@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include "parser.h"
+#include "editor.h"
 #include "validator.h"
 #include "printer.h"
 
@@ -99,5 +100,14 @@ int main() {
          << result.area
          << endl;
 
+<<<<<<< HEAD
+=======
+    Editor editor;
+    editor.insertBuffer(parser.nodes[1], parser.nodes[2], "insertTest", parser.nodes);
+    editor.resizeBuffer(parser.nodes[1], "resizeTest");
+
+    Validator validator;
+    validator.output(parser.nodes[0]);
+>>>>>>> ff51ff7c15d708e904c415d484ea204ca11a879c
     return 0;
 }
