@@ -141,7 +141,7 @@ void Parser::readPath() {
             path->launch = launchNode;
             path->capture = captureNode;
             path->FF_delay = FF_delay;
-
+            path ->clockPeriod = clock_period;
   
             paths.push_back(path);
 
@@ -227,6 +227,7 @@ void Parser::readPath() {
                 path->launch = launchNode;
                 path->capture = captureNode;
                 path->SS_delay = SS_delay;
+                path->clockPeriod = clock_period;
                 paths.push_back(path);
             }
             

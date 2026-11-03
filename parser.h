@@ -30,6 +30,7 @@ public:
 
 class Path {
 public:
+    double clockPeriod = 0.0;
     Node* launch = nullptr;
     Node* capture = nullptr;
     double SS_delay = 0.0;
