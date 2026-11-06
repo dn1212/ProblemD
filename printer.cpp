@@ -4,6 +4,7 @@ void update_result(
     const vector<Node*>& nodes,
     const vector<Buffer>& buffers,
     const vector<Path*>& paths,
+    const unordered_map<string, Buffer>& bufferMap,
     TimingResult& result
 ){
     result.tns_ss = 0.0;
@@ -11,11 +12,30 @@ void update_result(
     result.tns_ff = 0.0;
     result.wns_ff = 0.0;
     result.area = 0.0;
+    for (Node* node : nodes) {
 
-    cout << "Setup WNS/TNS (SS corner):" << endl;
+        if (node->isBuffer) {
+
+            auto it = bufferMap.find(node->cellType);
+
+            if (it != bufferMap.end()) {
+
+                result.area +=
+                    it->second.width *
+                    it->second.height;
+            }
+        }
+    }
+    // test 
+    int setupViolation = 0;
+    int holdViolation = 0;
+    Path* worstSetupPath = nullptr;
+    Path* worstHoldPath = nullptr;
+
+    // cout << "Setup WNS/TNS (SS corner):" << endl;
     for (const auto& path : paths) {
-        cout << "Path: " << path->launch->name << " -> " << path->capture->name
-             << ", SS Delay: " << path->SS_delay << endl;
+        // cout << "Path: " << path->launch->name << " -> " << path->capture->name
+        //      << ", SS Delay: " << path->SS_delay << endl;
 
         double t_clk = path->clockPeriod;
         double t_setup = t_clk * 0.08;
@@ -29,18 +49,20 @@ void update_result(
 
         if (slack_ss < 0) {
             result.tns_ss += slack_ss;
+            setupViolation++;
         }
 
         if (slack_ss < result.wns_ss) {
             result.wns_ss = slack_ss;
+            worstSetupPath = path;
         }
     }
     
 
-    cout << "\nHold WNS/TNS (FF corner):" << endl;
+    // cout << "\nHold WNS/TNS (FF corner):" << endl;
     for (const auto& path : paths) {
-        cout << "Path: " << path->launch->name << " -> " << path->capture->name
-             << ", FF Delay: " << path->FF_delay << endl;
+        // cout << "Path: " << path->launch->name << " -> " << path->capture->name
+        //      << ", FF Delay: " << path->FF_delay << endl;
 
         double t_clk = path->clockPeriod;
         double t_hold = t_clk * 0.05;
@@ -54,10 +76,12 @@ void update_result(
 
         if (slack_ff < 0) {
             result.tns_ff += slack_ff;
+            holdViolation++;
         }
 
         if (slack_ff < result.wns_ff) {
             result.wns_ff = slack_ff;
+            worstHoldPath = path;
         }
     }
 
@@ -69,6 +93,35 @@ void update_result(
              << ", Fanout Max: " << buffer.fanoutMax
              << endl;
     }
+    cout << "Total Paths: " << paths.size() << endl;
+    cout << "Setup Violations: " << setupViolation << endl;
+    cout << "Hold Violations: " << holdViolation << endl;
+    if (worstSetupPath != nullptr) {
+        cout << "Worst Setup Path: "
+            << worstSetupPath->launch->name
+            << " -> "
+            << worstSetupPath->capture->name
+            << endl;
+    }
+
+    if (worstHoldPath != nullptr) {
+        cout << "Worst Hold Path: "
+            << worstHoldPath->launch->name
+            << " -> "
+            << worstHoldPath->capture->name
+            << endl;
+    }
+    cout << "Launch clk SS: "
+        << worstSetupPath->launch->clkDelaySS << endl;
+
+    cout << "Capture clk SS: "
+        << worstSetupPath->capture->clkDelaySS << endl;
+
+    cout << "Data delay SS: "
+        << worstSetupPath->SS_delay << endl;
+
+    cout << "Clock period: "
+        << worstSetupPath->clockPeriod << endl;
 }
 
 void print_score(double tns_ss, double tns_ssori, double wns_ss, double wns_ssori, double tns_ff, double tns_ffori, double wns_ff, double wns_ffori, double area, double areaori) {
@@ -87,8 +140,8 @@ void print_score(double tns_ss, double tns_ssori, double wns_ss, double wns_ssor
                  + beta * ((1 - tns_ff / tns_ffori) + (1- wns_ff / wns_ffori))
                  + gamma * (1 - area / areaori);
 
-    cout << "\nα: " << alpha << ", β: " << beta
-         << ", γ: " << gamma
+    cout << "\nalpha: " << alpha << ", beta: " << beta
+         << ", gamma: " << gamma
          << endl;
 
     cout << "Final Score: " << score << endl;

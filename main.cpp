@@ -75,6 +75,7 @@ int main() {
         parser.nodes,
         parser.buffers,
         parser.paths,
+        parser.bufferMap,
         result
     );
 
@@ -99,15 +100,10 @@ int main() {
     cout << "Area: "
          << result.area
          << endl;
-
-<<<<<<< HEAD
-=======
-    Editor editor;
-    editor.insertBuffer(parser.nodes[1], parser.nodes[2], "insertTest", parser.nodes);
-    editor.resizeBuffer(parser.nodes[1], "resizeTest");
-
-    Validator validator;
-    validator.output(parser.nodes[0]);
->>>>>>> ff51ff7c15d708e904c415d484ea204ca11a879c
+     print_score(
+        result.tns_ss, result.tns_ss, result.wns_ss, result.wns_ss,
+        result.tns_ff, result.tns_ff, result.wns_ff, result.wns_ff,
+        result.area, result.area
+    );
     return 0;
 }

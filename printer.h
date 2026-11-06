@@ -21,6 +21,7 @@ void update_result(
     const vector<Node*>& nodes,
     const vector<Buffer>& buffers,
     const vector<Path*>& paths,
+    const unordered_map<string, Buffer>& bufferMap,
     TimingResult& result
 );
 void print_score(double tns_ss, double tns_ssori, double wns_ss, double wns_ssori, double tns_ff, double tns_ffori, double wns_ff, double wns_ffori, double area, double areaori);
