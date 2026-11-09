@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "printer.h"
 #include "editor.h"
+#include "validator.h"
 
 using namespace std;
 
@@ -200,5 +201,33 @@ int main(){
         originalResult.area
     );
 
-    return 0;
+
+     Validator validator;
+     cout << "=== Validation ===" << endl;
+     
+     // check fanout
+     if (validator.checkFanout(parser.nodes, parser.buffers)) {
+          cout << "Fanout check passed" << endl;
+     } else {
+          cout << "Fanout check failed" << endl;
+     }
+     
+     // check new buffer
+     if(validator.checkNewBuffer(parser.nodes)){
+          cout << "New buffer check passed" << endl;
+     } else {
+          cout << "New buffer check fail" << endl;
+     }
+
+     // output file
+     validator.output(root);
+     
+     // check original node
+     if(validator.checkOriginalNode()){
+          cout << "Original node check passed" << endl;
+     } else {
+          cout << "Original node check fail" << endl;
+     }
+
+     return 0;
 }
