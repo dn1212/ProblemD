@@ -1,21 +1,18 @@
 #include <iostream>
-#include <algorithm>
 #include "parser.h"
-#include "editor.h"
-#include "validator.h"
 #include "printer.h"
+#include "editor.h"
 
 using namespace std;
 
-int main() {
+int main(){
 
     Parser parser;
+    Editor editor;
 
     parser.readNode();
     parser.readBuffer();
     parser.readPath();
-
-    cout << "===== Parser Finished =====" << endl;
 
     Node* root = parser.nodeMap["ROOT_CLK"];
 
@@ -27,83 +24,181 @@ int main() {
         parser.bufferMap
     );
 
-    cout << "\n===== Clock Delay =====" << endl;
+    TimingResult originalResult;
 
-    for (Node* node : parser.nodes) {
-
-        if (node->isFF) {
-            cout << node->name
-                 << " SS Clock Delay: "
-                 << node->clkDelaySS
-                 << ", FF Clock Delay: "
-                 << node->clkDelayFF
-                 << endl;
-        }
-    }
-
-    cout << "\n===== Path Skew =====" << endl;
-
-    for (Path* path : parser.paths) {
-
-        double skew_ss =
-            path->capture->clkDelaySS
-            - path->launch->clkDelaySS;
-
-        double skew_ff =
-            path->capture->clkDelayFF
-            - path->launch->clkDelayFF;
-
-        cout << path->launch->name
-             << " -> "
-             << path->capture->name
-             << endl;
-
-        cout << "SS skew: "
-             << skew_ss
-             << endl;
-
-        cout << "FF skew: "
-             << skew_ff
-             << endl;
-    }
-
-    TimingResult result;
-
-    cout << "\n===== Timing Result =====" << endl;
+    cout << "===== Original Result =====" << endl;
 
     update_result(
         parser.nodes,
         parser.buffers,
         parser.paths,
         parser.bufferMap,
-        result
+        originalResult
     );
 
-    cout << "\n===== Final Result =====" << endl;
+    cout << "\n===== Original Timing =====" << endl;
 
     cout << "TNS SS: "
-         << result.tns_ss
-         << endl;
+         << originalResult.tns_ss << endl;
 
     cout << "WNS SS: "
-         << result.wns_ss
-         << endl;
+         << originalResult.wns_ss << endl;
 
     cout << "TNS FF: "
-         << result.tns_ff
-         << endl;
+         << originalResult.tns_ff << endl;
 
     cout << "WNS FF: "
-         << result.wns_ff
-         << endl;
+         << originalResult.wns_ff << endl;
 
     cout << "Area: "
-         << result.area
+         << originalResult.area << endl;
+
+
+    Node* testParent = nullptr;
+    Node* testChild = nullptr;
+
+    for(Node* node : parser.nodes){
+
+        if(node->isBuffer &&
+           !node->children.empty()){
+
+            testParent = node;
+            testChild = node->children[0];
+
+            break;
+        }
+    }
+
+    if(testParent == nullptr ||
+       testChild == nullptr){
+
+        cout << "Cannot find test edge" << endl;
+        return 1;
+    }
+
+
+    cout << "\n===== Insert Buffer =====" << endl;
+
+    cout << "Before:" << endl;
+
+    cout << testParent->name
+         << " -> "
+         << testChild->name
          << endl;
-     print_score(
-        result.tns_ss, result.tns_ss, result.wns_ss, result.wns_ss,
-        result.tns_ff, result.tns_ff, result.wns_ff, result.wns_ff,
-        result.area, result.area
+
+
+    editor.insertBuffer(
+        testParent,
+        testChild,
+        "REALBUF_X4",
+        parser.nodes
     );
+
+
+    Node* newBuffer =
+        testChild->parent;
+
+
+    cout << "\nAfter:" << endl;
+
+    cout << testParent->name
+         << " -> "
+         << newBuffer->name
+         << " -> "
+         << testChild->name
+         << endl;
+
+    cout << "New Buffer Type: "
+         << newBuffer->cellType
+         << endl;
+
+
+    root->clkDelaySS = 0.0;
+    root->clkDelayFF = 0.0;
+
+    updateClockDelay(
+        root,
+        parser.bufferMap
+    );
+
+
+    TimingResult newResult;
+
+    cout << "\n===== Result After Insert =====" << endl;
+
+    update_result(
+        parser.nodes,
+        parser.buffers,
+        parser.paths,
+        parser.bufferMap,
+        newResult
+    );
+
+
+    cout << "\n===== New Timing =====" << endl;
+
+    cout << "TNS SS: "
+         << newResult.tns_ss << endl;
+
+    cout << "WNS SS: "
+         << newResult.wns_ss << endl;
+
+    cout << "TNS FF: "
+         << newResult.tns_ff << endl;
+
+    cout << "WNS FF: "
+         << newResult.wns_ff << endl;
+
+    cout << "Area: "
+         << newResult.area << endl;
+
+
+    cout << "\n===== Difference =====" << endl;
+
+    cout << "TNS SS change: "
+         << newResult.tns_ss
+            - originalResult.tns_ss
+         << endl;
+
+    cout << "WNS SS change: "
+         << newResult.wns_ss
+            - originalResult.wns_ss
+         << endl;
+
+    cout << "TNS FF change: "
+         << newResult.tns_ff
+            - originalResult.tns_ff
+         << endl;
+
+    cout << "WNS FF change: "
+         << newResult.wns_ff
+            - originalResult.wns_ff
+         << endl;
+
+    cout << "Area change: "
+         << newResult.area
+            - originalResult.area
+         << endl;
+
+
+    cout << "\n===== Score =====" << endl;
+
+    print_score(
+        newResult.tns_ss,
+        originalResult.tns_ss,
+
+        newResult.wns_ss,
+        originalResult.wns_ss,
+
+        newResult.tns_ff,
+        originalResult.tns_ff,
+
+        newResult.wns_ff,
+        originalResult.wns_ff,
+
+        newResult.area,
+        originalResult.area
+    );
+
     return 0;
 }

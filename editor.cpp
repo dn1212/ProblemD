@@ -13,6 +13,8 @@ void Editor::insertBuffer(Node* parent, Node* child, string cellType, vector<Nod
     bufferCount++;
 
     newBuffer->nodeType = "BUF";
+    newBuffer->isBuffer = true;
+    newBuffer->isFF = false;
     newBuffer->cellType = cellType;
     newBuffer->parent = parent;
     newBuffer->children.push_back(child);
