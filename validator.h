@@ -11,11 +11,13 @@ using namespace std;
 
 class Validator{
 public:
-    bool checkFanout();
-    bool checkOriginalNode();
-    bool checkNewBuffer();
+    bool checkFanout(const vector<Node*>& nodes, const vector<Buffer>& buffers);
+    
+    bool checkNewBuffer(const vector<Node*>& nodes);
 
     void output(Node* root);
+
+    bool checkOriginalNode();
 };
 
 #endif // VALIDATOR_H
