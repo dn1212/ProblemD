@@ -1,4 +1,5 @@
-# include "printer.h"
+#include "printer.h"
+
 
 void update_result(
     const vector<Node*>& nodes,
@@ -12,161 +13,299 @@ void update_result(
     result.tns_ff = 0.0;
     result.wns_ff = 0.0;
     result.area = 0.0;
-    for (Node* node : nodes) {
 
-        if (node->isBuffer) {
 
-            auto it = bufferMap.find(node->cellType);
+    for(Node* node : nodes){
 
-            if (it != bufferMap.end()) {
+        if(node->isBuffer){
+
+            auto it =
+                bufferMap.find(
+                    node->cellType
+                );
+
+
+            if(it !=
+               bufferMap.end()){
 
                 result.area +=
-                    it->second.width *
+                    it->second.width
+                    *
                     it->second.height;
             }
         }
     }
-    // test 
-    int setupViolation = 0;
-    int holdViolation = 0;
-    Path* worstSetupPath = nullptr;
-    Path* worstHoldPath = nullptr;
 
-    // cout << "Setup WNS/TNS (SS corner):" << endl;
-    for (const auto& path : paths) {
-        // cout << "Path: " << path->launch->name << " -> " << path->capture->name
-        //      << ", SS Delay: " << path->SS_delay << endl;
 
-        double t_clk = path->clockPeriod;
-        double t_setup = t_clk * 0.08;
-        double d_data = path->SS_delay;
+    for(const auto& path : paths){
 
-        double d_launch = path->launch->clkDelaySS;
-        double d_capture = path->capture->clkDelaySS;
-        double skew_ss = d_capture - d_launch;
+        double t_clk =
+            path->clockPeriod;
 
-        double slack_ss = t_clk - t_setup - d_data + skew_ss;
 
-        if (slack_ss < 0) {
-            result.tns_ss += slack_ss;
-            setupViolation++;
+        double t_setup =
+            t_clk * 0.08;
+
+
+        double d_data =
+            path->SS_delay;
+
+
+        double d_launch =
+            path->launch->clkDelaySS;
+
+
+        double d_capture =
+            path->capture->clkDelaySS;
+
+
+        double skew_ss =
+            d_capture -
+            d_launch;
+
+
+        double slack_ss =
+            t_clk
+            -
+            t_setup
+            -
+            d_data
+            +
+            skew_ss;
+
+
+        if(slack_ss < 0){
+
+            result.tns_ss +=
+                slack_ss;
         }
 
-        if (slack_ss < result.wns_ss) {
-            result.wns_ss = slack_ss;
-            worstSetupPath = path;
-        }
-    }
-    
 
-    // cout << "\nHold WNS/TNS (FF corner):" << endl;
-    for (const auto& path : paths) {
-        // cout << "Path: " << path->launch->name << " -> " << path->capture->name
-        //      << ", FF Delay: " << path->FF_delay << endl;
+        if(slack_ss <
+           result.wns_ss){
 
-        double t_clk = path->clockPeriod;
-        double t_hold = t_clk * 0.05;
-        double d_data = path->FF_delay;
-
-        double d_launch = path->launch->clkDelayFF;
-        double d_capture = path->capture->clkDelayFF;
-        double skew_ff = d_capture - d_launch;
-
-        double slack_ff = d_data - t_hold - skew_ff;
-
-        if (slack_ff < 0) {
-            result.tns_ff += slack_ff;
-            holdViolation++;
-        }
-
-        if (slack_ff < result.wns_ff) {
-            result.wns_ff = slack_ff;
-            worstHoldPath = path;
+            result.wns_ss =
+                slack_ss;
         }
     }
 
-    cout << "\nArea Table:" << endl;
-    for (const auto& buffer : buffers) {
-        cout << "Buffer: " << buffer.name
-             << ", Width: " << buffer.width
-             << ", Height: " << buffer.height
-             << ", Fanout Max: " << buffer.fanoutMax
-             << endl;
+
+    for(const auto& path : paths){
+
+        double t_clk =
+            path->clockPeriod;
+
+
+        double t_hold =
+            t_clk * 0.05;
+
+
+        double d_data =
+            path->FF_delay;
+
+
+        double d_launch =
+            path->launch->clkDelayFF;
+
+
+        double d_capture =
+            path->capture->clkDelayFF;
+
+
+        double skew_ff =
+            d_capture -
+            d_launch;
+
+
+        double slack_ff =
+            d_data
+            -
+            t_hold
+            -
+            skew_ff;
+
+
+        if(slack_ff < 0){
+
+            result.tns_ff +=
+                slack_ff;
+        }
+
+
+        if(slack_ff <
+           result.wns_ff){
+
+            result.wns_ff =
+                slack_ff;
+        }
     }
-    cout << "Total Paths: " << paths.size() << endl;
-    cout << "Setup Violations: " << setupViolation << endl;
-    cout << "Hold Violations: " << holdViolation << endl;
-    if (worstSetupPath != nullptr) {
-        cout << "Worst Setup Path: "
-            << worstSetupPath->launch->name
-            << " -> "
-            << worstSetupPath->capture->name
-            << endl;
-    }
-
-    if (worstHoldPath != nullptr) {
-        cout << "Worst Hold Path: "
-            << worstHoldPath->launch->name
-            << " -> "
-            << worstHoldPath->capture->name
-            << endl;
-    }
-    cout << "Launch clk SS: "
-        << worstSetupPath->launch->clkDelaySS << endl;
-
-    cout << "Capture clk SS: "
-        << worstSetupPath->capture->clkDelaySS << endl;
-
-    cout << "Data delay SS: "
-        << worstSetupPath->SS_delay << endl;
-
-    cout << "Clock period: "
-        << worstSetupPath->clockPeriod << endl;
 }
 
-void print_score(double tns_ss, double tns_ssori, double wns_ss, double wns_ssori, double tns_ff, double tns_ffori, double wns_ff, double wns_ffori, double area, double areaori) {
-    cout << "\nScore Report:" << endl;
-    cout << "TNS SS: " << tns_ss << ", Original TNS SS: " << tns_ssori << endl;
-    cout << "TNS FF: " << tns_ff << ", Original TNS FF: " << tns_ffori << endl;
-    cout << "WNS SS: " << wns_ss << ", Original WNS SS: " << wns_ssori << endl;
-    cout << "WNS FF: " << wns_ff << ", Original WNS FF: " << wns_ffori << endl;
-    cout << "Area: " << area << ", Original Area: " << areaori << endl;
 
+double calculate_score(
+    const TimingResult& result,
+    const TimingResult& originalResult
+){
     double alpha = 0.4;
     double beta = 0.3;
     double gamma = 0.3;
 
-    double score = alpha * ((1 - tns_ss / tns_ssori)+(1- wns_ss / wns_ssori))
-                 + beta * ((1 - tns_ff / tns_ffori) + (1- wns_ff / wns_ffori))
-                 + gamma * (1 - area / areaori);
 
-    cout << "\nalpha: " << alpha << ", beta: " << beta
-         << ", gamma: " << gamma
-         << endl;
+    double score =
+        alpha * (
+            (1 - result.tns_ss /
+                 originalResult.tns_ss)
+            +
+            (1 - result.wns_ss /
+                 originalResult.wns_ss)
+        )
+        +
+        beta * (
+            (1 - result.tns_ff /
+                 originalResult.tns_ff)
+            +
+            (1 - result.wns_ff /
+                 originalResult.wns_ff)
+        )
+        +
+        gamma * (
+            1 - result.area /
+                originalResult.area
+        );
 
-    cout << "Final Score: " << score << endl;
+
+    return score;
 }
 
-void updateClockDelay(Node* node,
-                      unordered_map<string, Buffer>& bufferLib)
-{
-    for (Node* child : node->children) {
 
-        child->clkDelaySS = node->clkDelaySS;
-        child->clkDelayFF = node->clkDelayFF;
+void print_score(
+    const TimingResult& result,
+    const TimingResult& originalResult
+){
+    double score =
+        calculate_score(
+            result,
+            originalResult
+        );
 
-        if (node->isBuffer) {
-            int fanout = node->children.size();
 
-            Buffer& buf = bufferLib[node->cellType];
+    cout << "\nScore Report:"
+         << endl;
+
+
+    cout << "TNS SS: "
+         << result.tns_ss
+         << ", Original TNS SS: "
+         << originalResult.tns_ss
+         << endl;
+
+
+    cout << "TNS FF: "
+         << result.tns_ff
+         << ", Original TNS FF: "
+         << originalResult.tns_ff
+         << endl;
+
+
+    cout << "WNS SS: "
+         << result.wns_ss
+         << ", Original WNS SS: "
+         << originalResult.wns_ss
+         << endl;
+
+
+    cout << "WNS FF: "
+         << result.wns_ff
+         << ", Original WNS FF: "
+         << originalResult.wns_ff
+         << endl;
+
+
+    cout << "Area: "
+         << result.area
+         << ", Original Area: "
+         << originalResult.area
+         << endl;
+
+
+    cout << "Final Score: "
+         << score
+         << endl;
+}
+
+
+void updateClockDelay(
+    Node* node,
+    unordered_map<string, Buffer>& bufferLib
+){
+    for(Node* child :
+        node->children){
+
+        child->clkDelaySS =
+            node->clkDelaySS;
+
+
+        child->clkDelayFF =
+            node->clkDelayFF;
+
+
+        if(node->isBuffer){
+
+            int fanout =
+                static_cast<int>(
+                    node->children.size()
+                );
+
+
+            auto it =
+                bufferLib.find(
+                    node->cellType
+                );
+
+
+            if(it ==
+               bufferLib.end()){
+
+                cout << "Buffer not found: "
+                     << node->cellType
+                     << endl;
+
+                exit(1);
+            }
+
+
+            Buffer& buf =
+                it->second;
+
+
+            if(fanout <= 0 ||
+               fanout >
+               buf.fanoutMax){
+
+                cout << "Invalid fanout: "
+                     << node->name
+                     << endl;
+
+                exit(1);
+            }
+
 
             child->clkDelaySS +=
-                buf.SS_delay[fanout - 1];
+                buf.SS_delay[
+                    fanout - 1
+                ];
+
 
             child->clkDelayFF +=
-                buf.FF_delay[fanout - 1];
+                buf.FF_delay[
+                    fanout - 1
+                ];
         }
 
-        updateClockDelay(child, bufferLib);
+
+        updateClockDelay(
+            child,
+            bufferLib
+        );
     }
 }
